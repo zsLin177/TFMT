@@ -113,7 +113,6 @@ class Transformer(nn.Module):
 
     @classmethod
     def load(cls, path):
-        # 这个cls学到了
         # device = 'cuda' if torch.cuda.is_available() else 'cpu'
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         state = torch.load(path, map_location=device)

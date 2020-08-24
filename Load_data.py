@@ -31,9 +31,9 @@ def DataLoader(device,test=False):
     src_pad_idx = SRC.vocab.stoi['<pad>']
     tgt_pad_idx = TGT.vocab.stoi['<pad>']
 
-    train_iter = data.BucketIterator(train, batch_size=64, sort_key=lambda x: len(x.src),
+    train_iter = data.BucketIterator(train, batch_size=32, sort_key=lambda x: len(x.src),
                                      shuffle=True,device=device)
-    dev_iter = data.BucketIterator(dev, batch_size=64, sort_key=lambda x: len(x.src),
+    dev_iter = data.BucketIterator(dev, batch_size=32, sort_key=lambda x: len(x.src),
                                      shuffle=True,device=device)
 
     return train_iter, dev_iter, src_pad_idx,\
