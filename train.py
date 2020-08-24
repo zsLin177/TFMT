@@ -75,7 +75,7 @@ class SimpleLossCompute:
         if self.opt is not None:
             self.opt.step()
             self.opt.optimizer.zero_grad()
-        return loss.data[0] * norm
+        return loss.item() * norm
 
 
 def run_epoch(data_iter, model, loss_compute, pad_idx):
@@ -101,22 +101,7 @@ def run_epoch(data_iter, model, loss_compute, pad_idx):
             tokens = 0
     return total_loss / total_tokens
 
-def greedy_decode(model, src, src_mask, max_len, start_symbol):
-    memory = model.encode(src, src_mask)
-    ys = torch.ones(1, 1).fill_(start_symbol).type_as(src.data)
-    for i in range(max_len-1):
-        out = model.decode(memory, src_mask,
-                           Variable(ys),
-                           Variable(subsequent_mask(ys.size(1))
-                                    .type_as(src.data)))
-        prob = model.generator(out[:, -1])
-        _, next_word = torch.max(prob, dim = 1)
-        next_word = next_word.data[0]
-        ys = torch.cat([ys,
-                        torch.ones(1, 1).type_as(src.data).fill_(next_word)], dim=1)
-    return ys
-
-def train(model, data_iter, loss_com, pad_idx, epochs=30, patenice=3):
+def train(model, data_iter, loss_com, pad_idx, epochs=300, patenice=10):
     min_loss = float('inf')
     min_epoch = -1
     for epoch in range(epochs):
@@ -142,6 +127,6 @@ if __name__ == '__main__':
     model = model.to(device)
     criterion = LabelSmoothing(size=len(tgt_vocab), padding_idx=tgt_pad_idx, smoothing=0.1)
     criterion.to(device)
-    model_opt = NoamOpt(model.d_model, 1, 400,
+    model_opt = NoamOpt(model.d_model, 1, 4000,
                         torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
     train(model, train_iter, SimpleLossCompute(model.generator,criterion,model_opt),tgt_pad_idx)
